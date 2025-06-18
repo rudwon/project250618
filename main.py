@@ -1,218 +1,88 @@
 import streamlit as st
 
-# 118개 원소 데이터 (필수 정보만 간략화)
-elements = {
-    "H": {"name": "Hydrogen", "atomic_number": 1, "weight": 1.008, "category": "Nonmetal", "description": "The lightest and most abundant element in the universe."},
-    "He": {"name": "Helium", "atomic_number": 2, "weight": 4.0026, "category": "Noble Gas", "description": "A colorless, odorless inert gas used in balloons."},
-    "Li": {"name": "Lithium", "atomic_number": 3, "weight": 6.94, "category": "Alkali Metal", "description": "A soft, silvery metal used in batteries."},
-    "Be": {"name": "Beryllium", "atomic_number": 4, "weight": 9.0122, "category": "Alkaline Earth Metal", "description": "A hard, gray metal used in aerospace materials."},
-    "B": {"name": "Boron", "atomic_number": 5, "weight": 10.81, "category": "Metalloid", "description": "Used in glass and detergents."},
-    "C": {"name": "Carbon", "atomic_number": 6, "weight": 12.011, "category": "Nonmetal", "description": "Basis of organic life."},
-    "N": {"name": "Nitrogen", "atomic_number": 7, "weight": 14.007, "category": "Nonmetal", "description": "Makes up most of Earth’s atmosphere."},
-    "O": {"name": "Oxygen", "atomic_number": 8, "weight": 15.999, "category": "Nonmetal", "description": "Essential for respiration."},
-    "F": {"name": "Fluorine", "atomic_number": 9, "weight": 18.998, "category": "Halogen", "description": "A highly reactive gas."},
-    "Ne": {"name": "Neon", "atomic_number": 10, "weight": 20.180, "category": "Noble Gas", "description": "Used in neon lights."},
-    # ... 11부터 117까지는 예시 생략, 필요시 추가 가능 ...
-    "Og": {"name": "Oganesson", "atomic_number": 118, "weight": 294, "category": "Noble Gas", "description": "A synthetic element, very unstable."}
+# 원소 상세 데이터 일부 예시 (필요시 더 확장 가능)
+detailed_info = {
+    "H": {"name": "수소", "number": 1, "weight": 1.008, "desc": "우주에서 가장 가벼운 원소로, 연료 및 화학 반응에 중요합니다."},
+    "He": {"name": "헬륨", "number": 2, "weight": 4.0026, "desc": "비활성 기체로 풍선과 냉각에 사용됩니다."},
+    "Fe": {"name": "철", "number": 26, "weight": 55.845, "desc": "건축과 공학에 많이 사용되는 금속입니다."},
+    "Au": {"name": "금", "number": 79, "weight": 196.97, "desc": "귀금속으로, 장신구와 전자제품에 사용됩니다."},
+    "O": {"name": "산소", "number": 8, "weight": 15.999, "desc": "호흡에 필수적인 원소로, 대기 중 약 21%를 차지합니다."},
 }
 
-# 주기율표의 원소 위치(가로: 18, 세로: 7)  
-# 빈칸은 ""로 표시. 주기율표 배열은 7행 18열로 표준 주기율표 형태.
-periodic_table_layout = [
-    ["H",  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "He"],
+def get_element_info(symbol):
+    if symbol in detailed_info:
+        return detailed_info[symbol]
+    else:
+        return {
+            "name": f"원소 {symbol}",
+            "number": "N/A",
+            "weight": "N/A",
+            "desc": f"{symbol} 원소에 대한 상세 정보가 준비 중입니다."
+        }
+
+# 주기율표 배치 (1~7주기, 18족)
+# 빈 칸은 빈 문자열 "" 로 채움
+periodic_table = [
+    # 1주기
+    ["H", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "He"],
+    # 2주기
     ["Li", "Be", "", "", "", "", "", "", "", "", "", "", "B", "C", "N", "O", "F", "Ne"],
+    # 3주기
     ["Na", "Mg", "", "", "", "", "", "", "", "", "", "", "Al", "Si", "P", "S", "Cl", "Ar"],
+    # 4주기
     ["K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr"],
+    # 5주기
     ["Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe"],
+    # 6주기
     ["Cs", "Ba", "La", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn"],
+    # 7주기
     ["Fr", "Ra", "Ac", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"],
 ]
 
-# 란타넘과 악티늄 족(내부전이족)
+# 란타넘족과 악티늄족은 따로 표시 (주기 6,7 아래)
 lanthanides = ["Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"]
-actinides = ["Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr"]
+actinides  = ["Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr"]
 
-# 란타넘족과 악티늄족 위치 표시
-lanth_row = ["", "", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "", ""]
-actin_row = ["", "", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "", ""]
+st.set_page_config(page_title="주기율표 원소 소개", layout="wide")
 
-# 카테고리별 색상표
-category_colors = {
-    "Nonmetal": "#4caf50",
-    "Noble Gas": "#2196f3",
-    "Alkali Metal": "#ff5722",
-    "Alkaline Earth Metal": "#ff9800",
-    "Metalloid": "#9c27b0",
-    "Halogen": "#e91e63",
-    "Lanthanide": "#ffb300",
-    "Actinide": "#ff6f00",
-    "Transition Metal": "#009688",
-    "Post-Transition Metal": "#607d8b",
-    "": "#e0e0e0"
-}
+st.title("🌟 주기율표 원소 소개 🌟")
+st.write("원소 기호를 눌러 상세 정보를 확인하세요!")
 
-# 각 원소 카테고리 분류 (간단히 분류 - 더 세밀한 분류 가능)
-transition_metals = ["Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn",
-                     "Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd",
-                     "Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg",
-                     "Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn"]
+selected_element = None
 
-post_transition_metals = ["Al","Ga","In","Sn","Tl","Pb","Bi","Nh","Fl","Mc","Lv"]
+# 주기율표 표시
+for period in periodic_table:
+    cols = st.columns(len(period))
+    for i, symbol in enumerate(period):
+        if symbol == "":
+            cols[i].write("")  # 빈 칸
+        else:
+            if cols[i].button(symbol):
+                selected_element = symbol
 
-# 각 원소에 카테고리 자동 매핑
-for el in elements.keys():
-    if el in transition_metals:
-        elements[el]["category"] = "Transition Metal"
-    elif el in post_transition_metals:
-        elements[el]["category"] = "Post-Transition Metal"
-    elif el in lanthanides:
-        elements[el]["category"] = "Lanthanide"
-    elif el in actinides:
-        elements[el]["category"] = "Actinide"
-    elif el not in elements or "category" not in elements[el]:
-        elements.setdefault(el, {"category": ""})
+st.write("---")
+# 란타넘족과 악티늄족 별도 표시
+st.write("### 란타넘족 (Lanthanides)")
+cols = st.columns(len(lanthanides))
+for i, sym in enumerate(lanthanides):
+    if cols[i].button(sym):
+        selected_element = sym
 
-# 기본 세팅
-st.set_page_config(page_title="✨화려한 주기율표✨", layout="wide")
+st.write("### 악티늄족 (Actinides)")
+cols = st.columns(len(actinides))
+for i, sym in enumerate(actinides):
+    if cols[i].button(sym):
+        selected_element = sym
 
-# CSS 꾸미기 + 애니메이션
-st.markdown("""
-<style>
-/* 기본 레이아웃 */
-body {
-    background: linear-gradient(120deg, #1f1c2c, #928dab);
-    color: #eee;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
-}
-h1 {
-    text-align: center;
-    margin-bottom: 10px;
-    text-shadow: 3px 3px 8px #000;
-}
-
-/* 주기율표 컨테이너 */
-.periodic-table {
-    display: grid;
-    grid-template-columns: repeat(18, 60px);
-    gap: 6px;
-    padding: 10px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 16px;
-    max-height: 600px;
-    overflow-y: auto;
-    box-shadow: 0 0 25px rgba(0,0,0,0.5);
-}
-
-/* 원소 박스 */
-.element {
-    border-radius: 10px;
-    text-align: center;
-    padding: 8px 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
-    user-select: none;
-}
-.element:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.8);
-    z-index: 10;
-}
-
-/* 선택된 원소 강조 */
-.element.selected {
-    box-shadow: 0 0 20px 4px #fff;
-    transform: scale(1.15);
-}
-
-/* 원자번호 */
-.atomic-number {
-    font-size: 11px;
-    font-weight: 600;
-    opacity: 0.8;
-}
-
-/* 원소기호 */
-.symbol {
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: 1.5px;
-}
-
-/* 원소 이름 */
-.name {
-    font-size: 9px;
-    margin-top: 2px;
-    font-weight: 700;
-    opacity: 0.85;
-}
-
-/* 상세정보 박스 */
-.info-box {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 24px;
-    padding: 30px;
-    color: white;
-    box-shadow: 0 0 25px rgba(0,0,0,0.6);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: text;
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-/* 제목 */
-.info-box h2 {
-    margin-top: 0;
-    font-size: 40px;
-    letter-spacing: 3px;
-    text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
-}
-
-/* 부제목 */
-.info-box .subtitle {
-    font-size: 16px;
-    margin-bottom: 20px;
-    font-weight: 600;
-    text-transform: uppercase;
-    opacity: 0.8;
-}
-
-/* 설명 */
-.info-box p {
-    font-size: 18px;
-    line-height: 1.5;
-}
-
-/* 스크롤바 꾸미기 */
-.periodic-table::-webkit-scrollbar {
-    width: 8px;
-}
-.periodic-table::-webkit-scrollbar-thumb {
-    background-color: #764ba2;
-    border-radius: 10px;
-}
-.periodic-table::-webkit-scrollbar-track {
-    background-color: transparent;
-}
-
-/* 왼쪽 고정, 오른쪽 고정 */
-.app-container {
-    display: flex;
-    gap: 24px;
-    height: 650px;
-}
-.left-panel {
-    flex: 1.2;
-    max-width: 1200px;
-}
-.right-panel {
-    flex: 1;
-    min-width: 350px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.title("✨ 화려한 주기율표 ✨")
-st.write("원소기호를 클릭
+# 클릭한 원소 정보 출력
+if selected_element:
+    info = get_element_info(selected_element)
+    st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+                    border-radius: 15px; padding: 20px; margin-top: 20px;
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.3); color: white;">
+            <h2 style="text-align:center;">{info['name']} ({selected_element})</h2>
+            <h4 style="text-align:center;">원자번호: {info['number']} | 원자량: {info['weight']}</h4>
+            <p style="font-size:18px; text-align:center;">{info['desc']}</p>
+        </div>
+    """, unsafe_allow_html=True)
